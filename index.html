@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Monitoria Coletiva (1:N) - Scrum & Gestão Escolar</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      line-height: 1.6;
+    }
+
+    /* Acessibilidade: foco visível na navegação por teclado */
+    a:focus, button:focus, input:focus, select:focus, textarea:focus {
+      outline: 3px solid #D97706;
+      outline-offset: 2px;
+    }
+
+    /* Cabeçalho e Navegação de Rotas */
+    header {
+      background-color: #1E3A8A;
+      color: #FFFFFF;
+      padding: 24px 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-container {
+      max-width: 1050px;
+      margin: 0 auto;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      color: #E2E8F0;
+      font-size: 0.95rem;
+    }
+
+    nav {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-rota {
+      background-color: #1D4ED8;
+      color: #FFFFFF;
+      border: 2px solid #93C5FD;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-rota:hover {
+      background-color: #2563EB;
+    }
+
+    .btn-rota.ativo {
+      background-color: #D97706;
+      border-color: #FFFFFF;
+      color: #FFFFFF;
+    }
+
+    /* Área Principal */
+    main {
+      max-width: 1050px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .rota-view {
+      display: none;
+      background-color: #FFFFFF;
+      padding: 28px;
+      border-radius: 10px;
+      border: 2px solid #CBD5E1;
+    }
+
+    .rota-view.ativa {
+      display: block;
+    }
+
+    h2 {
+      color: #1E3A8A;
+      font-size: 1.5rem;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      color: #1E293B;
+      font-size: 1.15rem;
+      margin: 20px 0 12px;
+    }
+
+    /* Formulários */
+    .grid-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .campo {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #0F172A;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #475569;
+      border-radius: 6px;
+      font-size: 1rem;
+      color: #0F172A;
+      background-color: #FFFFFF;
+    }
+
+    .btn-submit {
+      background-color: #1E3A8A;
+      color: #FFFFFF;
+      border: none;
+      padding: 13px 22px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-submit:hover {
+      background-color: #172554;
+    }
+
+    /* Alerta de Confirmação */
+    .alerta-sucesso {
+      display: none;
+      background-color: #DCFCE7;
+      border: 2px solid #15803D;
+      color: #14532D;
+      padding: 14px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    /* Dashboard Gestor (Pedagógico e Diretoria) */
+    .filtro-perfil {
+      background-color: #F1F5F9;
+      padding: 14px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .metricas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    .card-kpi {
+      background-color: #EFF6FF;
+      border-left: 6px solid #1E3A8A;
+      padding: 18px;
+      border-radius: 6px;
+    }
+
+    .card-kpi .valor {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1E3A8A;
+      display: block;
+    }
+
+    .card-kpi .titulo {
+      font-size: 0.9rem;
+      color: #334155;
+      font-weight: bold;
+    }
+
+    /* Gráfico de Barras em CSS/JS */
+    .grafico-container {
+      background-color: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .barra-item {
+      margin-bottom: 14px;
+    }
+
+    .barra-info {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .barra-fundo {
+      background-color: #E2E8F0;
+      height: 18px;
+      border-radius: 9px;
+      overflow: hidden;
+    }
+
+    .barra-preenchimento {
+      background-color: #1D4ED8;
+      height: 100%;
+      border-radius: 9px;
+      transition: width 0.4s ease;
+    }
+
+    /* Tabela de Relatórios */
+    .tabela-responsiva {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #CBD5E1;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #1E3A8A;
+      color: #FFFFFF;
+    }
+
+    tr:nth-child(even) {
+      background-color: #F8FAFC;
+    }
+
+    .badge-status {
+      background-color: #DBEAFE;
+      color: #1E40AF;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    /* Quadro Scrum */
+    .scrum-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .coluna-scrum {
+      background-color: #F1F5F9;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #CBD5E1;
+    }
+
+    .card-story {
+      background-color: #FFFFFF;
+      border-left: 4px solid #D97706;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .tag-role {
+      display: inline-block;
+      background-color: #1E3A8A;
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      background-color: #0F172A;
+      color: #FFFFFF;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <h1>Sistema de Monitoria Coletiva (1:N)</h1>
+      <p>Plataforma Escolar Integrada — Professores, Equipe Pedagógica e Diretoria</p>
+      
+      <!-- Navegação de Rotas / Controle de Acesso -->
+      <nav aria-label="Rotas do sistema por perfil">
+        <button type="button" class="btn-rota ativo" onclick="navegarRota('professor', this)">
+          Rota: Painel do Professor
+        </button>
+        <button type="button" class="btn-rota" onclick="navegarRota('gestor', this)">
+          Rota: Painel Gestor (Pedagógico / Diretoria)
+        </button>
+        <button type="button" class="btn-rota" onclick="navegarRota('scrum', this)">
+          Rota: Sprint Planning (Scrum)
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- =========================================================
+         ROTA 1: PAINEL DO PROFESSOR (SOLICITAÇÃO 1:N PARA TURMA)
+         ========================================================= -->
+    <section id="rota-professor" class="rota-view ativa" aria-labelledby="titulo-prof">
+      <h2 id="titulo-prof">Painel do Professor — Agendar Monitoria Coletiva</h2>
+      
+      <div id="feedback-agendamento" class="alerta-sucesso" role="status"></div>
+
+      <form id="form-monitoria" onsubmit="registrarMonitoria(event)">
+        <div class="grid-form">
+          <div class="campo">
+            <label for="prof-nome">Professor Solicitante:</label>
+            <select id="prof-nome" required>
+              <option value="Prof. Roberto Silva">Prof. Roberto Silva (Matemática)</option>
+              <option value="Profa. Helena Costa">Profa. Helena Costa (Química)</option>
+              <option value="Prof. Marcos Alves">Prof. Marcos Alves (Física)</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="turma-destino">Turma Vinculada (Atendimento 1:N):</label>
+            <select id="turma-destino" required>
+              <option value="3º Ano A">3º Ano A — Matutino (38 alunos)</option>
+              <option value="2º Ano B">2º Ano B — Vespertino (35 alunos)</option>
+              <option value="1º Ano C">1º Ano C — Matutino (40 alunos)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-form">
+          <div class="campo">
+            <label for="monitor-escolhido">Aluno Monitor Responsável:</label>
+            <select id="monitor-escolhido" required>
+              <option value="Ana Clara (Exatas)">Ana Clara (Monitora de Matemática/Física)</option>
+              <option value="Lucas Mendes (Ciências)">Lucas Mendes (Monitor de Química/Biologia)</option>
+              <option value="Beatriz Souza (Linguagens)">Beatriz Souza (Monitora de Redação)</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="data-sessao">Data da Revisão Coletiva:</label>
+            <input type="date" id="data-sessao" required>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="tema-aula">Conteúdo / Objetivo da Revisão pré-prova:</label>
+          <input type="text" id="tema-aula" required placeholder="Ex: Resolução de lista de exercícios sobre Funções Quadráticas">
+        </div>
+
+        <button type="submit" class="btn-submit">Solicitar Monitoria para a Turma Toda</button>
+      </form>
+    </section>
+
+    <!-- =========================================================
+         ROTA 2: PAINEL GESTOR (EQUIPE PEDAGÓGICA E DIRETORIA)
+         ========================================================= -->
+    <section id="rota-gestor" class="rota-view" aria-labelledby="titulo-gestor">
+      <h2 id="titulo-gestor">Painel Gestor — Relatórios Pedagógicos e Diretivos</h2>
+
+      <div class="filtro-perfil">
+        <label for="visao-gestao" style="margin:0;">Perfil Logado (RBAC):</label>
+        <select id="visao-gestao" style="max-width: 320px;" onchange="atualizarVisaoGestao()">
+          <option value="diretoria">Equipe Diretiva (Indicadores Gerais da Escola)</option>
+          <option value="pedagogico">Equipe Pedagógica (Acompanhamento de Conteúdos)</option>
+        </select>
+      </div>
+
+      <!-- KPIs -->
+      <div class="metricas-grid">
+        <div class="card-kpi">
+          <span class="valor" id="kpi-sessoes">3</span>
+          <span class="titulo">Monitorias Coletivas (1:N)</span>
+        </div>
+        <div class="card-kpi">
+          <span class="valor" id="kpi-alunos">113</span>
+          <span class="titulo">Estudantes Impactados</span>
+        </div>
+        <div class="card-kpi">
+          <span class="valor">92%</span>
+          <span class="titulo">Engajamento Médio das Turmas</span>
+        </div>
+        <div class="card-kpi">
+          <span class="valor">4.9 / 5</span>
+          <span class="titulo">Desempenho dos Monitores</span>
+        </div>
+      </div>
+
+      <!-- Gráfico de Engajamento -->
+      <div class="grafico-container">
+        <h3 style="margin-top:0;">Engajamento e Participação por Turma</h3>
+        <div class="barra-item">
+          <div class="barra-info"><span>3º Ano A</span><span>96% de presença</span></div>
+          <div class="barra-fundo"><div class="barra-preenchimento" style="width: 96%;"></div></div>
+        </div>
+        <div class="barra-item">
+          <div class="barra-info"><span>2º Ano B</span><span>89% de presença</span></div>
+          <div class="barra-fundo"><div class="barra-preenchimento" style="width: 89%;"></div></div>
+        </div>
+        <div class="barra-item">
+          <div class="barra-info"><span>1º Ano C</span><span>91% de presença</span></div>
+          <div class="barra-fundo"><div class="barra-preenchimento" style="width: 91%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Tabela de Dados Integrados -->
+      <h3>Histórico de Solicitações Coletivas por Turma</h3>
+      <div class="tabela-responsiva">
+        <table>
+          <thead>
+            <tr>
+              <th>Turma</th>
+              <th>Professor Solicitante</th>
+              <th>Tema da Revisão</th>
+              <th>Monitor</th>
+              <th>Data</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-dados-gestao">
+            <tr>
+              <td><strong>3º Ano A</strong></td>
+              <td>Prof. Roberto Silva</td>
+              <td>Revisão de Funções Quadráticas</td>
+              <td>Ana Clara (Exatas)</td>
+              <td>2026-11-18</td>
+              <td><span class="badge-status">Confirmada</span></td>
+            </tr>
+            <tr>
+              <td><strong>2º Ano B</strong></td>
+              <td>Profa. Helena Costa</td>
+              <td>Estequiometria e Reações Químicas</td>
+              <td>Lucas Mendes (Ciências)</td>
+              <td>2026-11-19</td>
+              <td><span class="badge-status">Confirmada</span></td>
+            </tr>
+            <tr>
+              <td><strong>1º Ano C</strong></td>
+              <td>Prof. Marcos Alves</td>
+              <td>Leis de Newton — Exercícios</td>
+              <td>Ana Clara (Exatas)</td>
+              <td>2026-11-21</td>
+              <td><span class="badge-status">Agendada</span></td>
+            </tr>
+          </tbody>
